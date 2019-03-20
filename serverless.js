@@ -11,8 +11,6 @@ const {
 } = require('./utils')
 const { Component } = require('@serverless/components')
 
-const outputMask = ['name', 'service', 'policy', 'arn']
-
 const defaults = {
   name: 'serverless',
   service: 'lambda.amazonaws.com',
@@ -58,8 +56,6 @@ class AwsIamRole extends Component {
     this.state.name = config.name
     await this.save()
 
-    // for some weird reason using pick
-    // fails when deploying roles in parallel
     const outputs = {
       name: config.name,
       arn: config.arn,
@@ -82,7 +78,12 @@ class AwsIamRole extends Component {
     this.state = {}
     await this.save()
 
-    return {}
+    const outputs = {
+      name: config.name
+    }
+
+    this.cli.outputs(outputs)
+    return outputs
   }
 }
 
