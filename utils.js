@@ -128,6 +128,12 @@ const configChanged = (prevRole, role) => {
   // todo add name and policy
   const inputs = pick(['service'], role)
   const prevInputs = pick(['service'], prevRole)
+
+  if (inputs.service.length !== undefined && prevInputs.service.length !== undefined) {
+    inputs.service.sort()
+    prevInputs.service.sort()
+  }
+
   return not(equals(inputs, prevInputs))
 }
 
