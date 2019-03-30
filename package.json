@@ -12,7 +12,7 @@
   "author": "Serverless, Inc.",
   "license": "MIT",
   "dependencies": {
-    "@serverless/components": "^0.1.0",
+    "@serverless/components": "^0.1.10",
     "aws-sdk": "^2.424.0",
     "ramda": "^0.26.0"
   },

@@ -1,5 +1,5 @@
 const { sleep } = require('@serverless/components')
-const { equals, isEmpty, has, not, pick } = require('ramda')
+const { equals, isEmpty, has, not, pick, type } = require('ramda')
 
 const addRolePolicy = async ({ iam, name, policy }) => {
   if (has('arn', policy)) {
@@ -129,8 +129,10 @@ const configChanged = (prevRole, role) => {
   const inputs = pick(['service'], role)
   const prevInputs = pick(['service'], prevRole)
 
-  if (inputs.service.length !== undefined && prevInputs.service.length !== undefined) {
+  if (type(inputs.service) === 'Array') {
     inputs.service.sort()
+  }
+  if (type(prevInputs.service) === 'Array') {
     prevInputs.service.sort()
   }
 
