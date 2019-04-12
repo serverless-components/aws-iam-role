@@ -1,42 +1,69 @@
-# AwsIamRole
-A serverless component that provisions an IAM Role.
+# AWS Iam Role
 
-## Usage
+Easily provision AWS IAM roles using [Serverless Components](https://github.com/serverless/components).
 
-### Declarative
+&nbsp;
+
+1. [Install](#1-install)
+2. [Create](#2-create)
+3. [Configure](#3-configure)
+4. [Deploy](#4-deploy)
+
+&nbsp;
+
+
+### 1. Install
+
+```shell
+$ npm install -g @serverless/components
+```
+
+### 2. Create
+
+Just create a `serverless.yml` file
+
+```shell
+$ touch serverless.yml
+```
+
+
+### 3. Configure
 
 ```yml
+# serverless.yml
 
-name: my-aws-role
-stage: dev
+name: my-app
 
-AwsIamRole@0.1.2::my-role:
-  name: my-role
-  service: lambda.amazonaws.com
-  policy:
-    arn: arn:aws:iam::aws:policy/AdministratorAccess
-  regoin: us-east-1
+myRole:
+  component: "@serverless/aws-iam-role"
+  inputs:
+    name: my-role
+    service: lambda.amazonaws.com
+    policy:
+      arn: arn:aws:iam::aws:policy/AdministratorAccess
+    regoin: us-east-1
 ```
 
-### Programatic
+### 4. Deploy
 
-```js
-npm i --save @serverless/aws-iam-role
+```shell
+role (master)$ components
+
+  myRole › outputs:
+  name:  'my-role'
+  arn:  'arn:aws:iam::552760238299:role/my-test-role'
+  service:  'lambda.amazonaws.com'
+  policy: 
+    arn:  'arn:aws:iam::aws:policy/AdministratorAccess'
+
+
+  37s › dev › my-app › done
+
+role (master)$
 ```
 
-```js
+&nbsp;
 
-const role = await this.load('@serverless/aws-iam-role')
+### New to Components?
 
-const inputs = {
-  name: 'my-role',
-  service: 'lambda.amazonaws.com',
-  policy: {
-    arn: 'arn:aws:iam::aws:policy/AdministratorAccess'
-  },
-  region: 'us-east-1'
-}
-
-await role(inputs)
-
-```
+Checkout the [Serverless Components](https://github.com/serverless/components) repo for more information.
