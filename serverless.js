@@ -7,7 +7,7 @@ const {
   addRolePolicy,
   removeRolePolicy,
   updateAssumeRolePolicy,
-  configChanged
+  inputsChanged
 } = require('./utils')
 const { Component } = require('@serverless/components')
 
@@ -22,45 +22,50 @@ const defaults = {
 
 class AwsIamRole extends Component {
   async default(inputs = {}) {
-    const config = mergeDeepRight(defaults, inputs)
-    const iam = new aws.IAM({ region: config.region, credentials: this.context.credentials.aws })
+    inputs = mergeDeepRight(defaults, inputs)
+    const iam = new aws.IAM({ region: inputs.region, credentials: this.context.credentials.aws })
 
     this.cli.status(`Deploying`)
 
-    const prevRole = await getRole({ iam, ...config })
+    const prevRole = await getRole({ iam, ...inputs })
+
+    // If an inline policy, remove ARN
+    if (inputs.policy.Version && inputs.policy.Statement) {
+      if (inputs.policy.arn) delete inputs.policy.arn
+    }
 
     if (!prevRole) {
       this.cli.status(`Creating`)
-      config.arn = await createRole({ iam, ...config })
+      inputs.arn = await createRole({ iam, ...inputs })
     } else {
-      config.arn = prevRole.arn
+      inputs.arn = prevRole.arn
 
-      if (configChanged(prevRole, config)) {
+      if (inputsChanged(prevRole, inputs)) {
         this.cli.status(`Updating`)
-        if (prevRole.service !== config.service) {
-          await updateAssumeRolePolicy({ iam, ...config })
+        if (prevRole.service !== inputs.service) {
+          await updateAssumeRolePolicy({ iam, ...inputs })
         }
-        if (!equals(prevRole.policy, config.policy)) {
-          await removeRolePolicy({ iam, ...config })
-          await addRolePolicy({ iam, ...config })
+        if (!equals(prevRole.policy, inputs.policy)) {
+          await removeRolePolicy({ iam, ...inputs })
+          await addRolePolicy({ iam, ...inputs })
         }
       }
     }
 
-    if (this.state.name && this.state.name !== config.name) {
+    if (this.state.name && this.state.name !== inputs.name) {
       this.cli.status(`Replacing`)
-      await deleteRole({ iam, name: this.state.name, policy: config.policy })
+      await deleteRole({ iam, name: this.state.name, policy: inputs.policy })
     }
 
-    this.state.arn = config.arn
-    this.state.name = config.name
+    this.state.arn = inputs.arn
+    this.state.name = inputs.name
     await this.save()
 
     const outputs = {
-      name: config.name,
-      arn: config.arn,
-      service: config.service,
-      policy: config.policy
+      name: inputs.name,
+      arn: inputs.arn,
+      service: inputs.service,
+      policy: inputs.policy
     }
 
     this.cli.outputs(outputs)
@@ -68,18 +73,18 @@ class AwsIamRole extends Component {
   }
 
   async remove(inputs = {}) {
-    const config = mergeDeepRight(defaults, inputs)
-    config.name = inputs.name || this.state.name || defaults.name
+    inputs = mergeDeepRight(defaults, inputs)
+    inputs.name = inputs.name || this.state.name || defaults.name
 
-    const iam = new aws.IAM({ region: config.region, credentials: this.context.credentials.aws })
+    const iam = new aws.IAM({ region: inputs.region, credentials: this.context.credentials.aws })
     this.cli.status(`Removing`)
-    await deleteRole({ iam, ...config })
+    await deleteRole({ iam, ...inputs })
 
     this.state = {}
     await this.save()
 
     const outputs = {
-      name: config.name
+      name: inputs.name
     }
 
     this.cli.outputs(outputs)

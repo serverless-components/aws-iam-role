@@ -124,7 +124,7 @@ const updateAssumeRolePolicy = async ({ iam, name, service }) => {
     .promise()
 }
 
-const configChanged = (prevRole, role) => {
+const inputsChanged = (prevRole, role) => {
   // todo add name and policy
   const inputs = pick(['service'], role)
   const prevInputs = pick(['service'], prevRole)
@@ -146,5 +146,5 @@ module.exports = {
   addRolePolicy,
   removeRolePolicy,
   updateAssumeRolePolicy,
-  configChanged
+  inputsChanged
 }
