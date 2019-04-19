@@ -1,4 +1,4 @@
-# AWS Iam Role
+# aws-iam-role
 
 Easily provision AWS IAM roles using [Serverless Components](https://github.com/serverless/components).
 
