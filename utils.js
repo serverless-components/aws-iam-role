@@ -1,4 +1,4 @@
-const { sleep } = require('@serverless/components')
+const { utils } = require('@serverless/components')
 const { equals, isEmpty, has, not, pick, type } = require('ramda')
 
 const addRolePolicy = async ({ iam, name, policy }) => {
@@ -19,7 +19,7 @@ const addRolePolicy = async ({ iam, name, policy }) => {
       .promise()
   }
 
-  return sleep(15000)
+  return utils.sleep(15000)
 }
 
 const removeRolePolicy = async ({ iam, name, policy }) => {
