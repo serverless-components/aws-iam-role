@@ -25,7 +25,7 @@ class AwsIamRole extends Component {
     inputs = mergeDeepRight(defaults, inputs)
     const iam = new aws.IAM({ region: inputs.region, credentials: this.context.credentials.aws })
 
-    this.cli.status(`Deploying`)
+    this.ui.status(`Deploying`)
 
     const prevRole = await getRole({ iam, ...inputs })
 
@@ -35,13 +35,13 @@ class AwsIamRole extends Component {
     }
 
     if (!prevRole) {
-      this.cli.status(`Creating`)
+      this.ui.status(`Creating`)
       inputs.arn = await createRole({ iam, ...inputs })
     } else {
       inputs.arn = prevRole.arn
 
       if (inputsChanged(prevRole, inputs)) {
-        this.cli.status(`Updating`)
+        this.ui.status(`Updating`)
         if (prevRole.service !== inputs.service) {
           await updateAssumeRolePolicy({ iam, ...inputs })
         }
@@ -53,7 +53,7 @@ class AwsIamRole extends Component {
     }
 
     if (this.state.name && this.state.name !== inputs.name) {
-      this.cli.status(`Replacing`)
+      this.ui.status(`Replacing`)
       await deleteRole({ iam, name: this.state.name, policy: inputs.policy })
     }
 
@@ -68,7 +68,10 @@ class AwsIamRole extends Component {
       policy: inputs.policy
     }
 
-    this.cli.outputs(outputs)
+    this.ui.log()
+    this.ui.output('name', `   ${inputs.name}`)
+    this.ui.output('arn', `    ${inputs.arn}`)
+    this.ui.output('service', `${inputs.service}`)
     return outputs
   }
 
@@ -77,7 +80,7 @@ class AwsIamRole extends Component {
     inputs.name = inputs.name || this.state.name || defaults.name
 
     const iam = new aws.IAM({ region: inputs.region, credentials: this.context.credentials.aws })
-    this.cli.status(`Removing`)
+    this.ui.status(`Removing`)
     await deleteRole({ iam, ...inputs })
 
     this.state = {}
@@ -87,7 +90,6 @@ class AwsIamRole extends Component {
       name: inputs.name
     }
 
-    this.cli.outputs(outputs)
     return outputs
   }
 }
