@@ -1,4 +1,4 @@
-const { utils } = require('@serverless/components')
+const { utils } = require('@serverless/core')
 const { equals, isEmpty, has, not, pick, type } = require('ramda')
 
 const addRolePolicy = async ({ iam, name, policy }) => {
