@@ -9,10 +9,10 @@ const {
   updateAssumeRolePolicy,
   inputsChanged
 } = require('./utils')
-const { Component } = require('@serverless/components')
+const { Component } = require('@serverless/core')
 
 const defaults = {
-  name: 'serverless',
+  name: 'serverless-new-cli',
   service: 'lambda.amazonaws.com',
   policy: {
     arn: 'arn:aws:iam::aws:policy/AdministratorAccess'
@@ -25,23 +25,25 @@ class AwsIamRole extends Component {
     inputs = mergeDeepRight(defaults, inputs)
     const iam = new aws.IAM({ region: inputs.region, credentials: this.context.credentials.aws })
 
-    this.ui.status(`Deploying`)
+    this.context.status(`Deploying`)
 
     const prevRole = await getRole({ iam, ...inputs })
 
     // If an inline policy, remove ARN
     if (inputs.policy.Version && inputs.policy.Statement) {
-      if (inputs.policy.arn) delete inputs.policy.arn
+      if (inputs.policy.arn) {
+        delete inputs.policy.arn
+      }
     }
 
     if (!prevRole) {
-      this.ui.status(`Creating`)
+      this.context.status(`Creating`)
       inputs.arn = await createRole({ iam, ...inputs })
     } else {
       inputs.arn = prevRole.arn
 
       if (inputsChanged(prevRole, inputs)) {
-        this.ui.status(`Updating`)
+        this.context.status(`Updating`)
         if (prevRole.service !== inputs.service) {
           await updateAssumeRolePolicy({ iam, ...inputs })
         }
@@ -53,7 +55,7 @@ class AwsIamRole extends Component {
     }
 
     if (this.state.name && this.state.name !== inputs.name) {
-      this.ui.status(`Replacing`)
+      this.context.status(`Replacing`)
       await deleteRole({ iam, name: this.state.name, policy: inputs.policy })
     }
 
@@ -68,10 +70,10 @@ class AwsIamRole extends Component {
       policy: inputs.policy
     }
 
-    this.ui.log()
-    this.ui.output('name', `   ${inputs.name}`)
-    this.ui.output('arn', `    ${inputs.arn}`)
-    this.ui.output('service', `${inputs.service}`)
+    this.context.log()
+    this.context.output('name', `   ${inputs.name}`)
+    this.context.output('arn', `    ${inputs.arn}`)
+    this.context.output('service', `${inputs.service}`)
     return outputs
   }
 
@@ -80,7 +82,7 @@ class AwsIamRole extends Component {
     inputs.name = inputs.name || this.state.name || defaults.name
 
     const iam = new aws.IAM({ region: inputs.region, credentials: this.context.credentials.aws })
-    this.ui.status(`Removing`)
+    this.context.status(`Removing`)
     await deleteRole({ iam, ...inputs })
 
     this.state = {}
