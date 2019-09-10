@@ -44,7 +44,7 @@ myRole:
     service: lambda.amazonaws.com
     policy:
       arn: arn:aws:iam::aws:policy/AdministratorAccess
-    regoin: us-east-1
+    region: us-east-1
 ```
 
 ### 4. Deploy
