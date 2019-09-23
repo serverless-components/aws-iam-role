@@ -1,5 +1,5 @@
 const { utils } = require('@serverless/core')
-const { equals, isEmpty, has, not, pick, type } = require('ramda')
+const { equals, isEmpty, has, not, pick, is } = require('ramda')
 
 const addRolePolicy = async ({ iam, name, policy }) => {
   if (has('arn', policy)) {
@@ -90,13 +90,22 @@ const deleteRole = async ({ iam, name, policy }) => {
 const getRole = async ({ iam, name }) => {
   try {
     const res = await iam.getRole({ RoleName: name }).promise()
-    // todo add policy
-    return {
+    const result = {
       name: res.Role.RoleName,
       arn: res.Role.Arn,
       service: JSON.parse(decodeURIComponent(res.Role.AssumeRolePolicyDocument)).Statement[0]
         .Principal.Service
     }
+    let policy
+    try {
+      policy = await iam.getRolePolicy({ RoleName: name, PolicyName: `${name}-policy` }).promise()
+      result.policy = JSON.parse(decodeURIComponent(policy.PolicyDocument))
+    } catch (error) {
+      if (not(equals(error.code, 'NoSuchEntity'))) {
+        throw error
+      }
+    }
+    return result
   } catch (e) {
     if (e.message.includes('cannot be found')) {
       return null
@@ -126,13 +135,13 @@ const updateAssumeRolePolicy = async ({ iam, name, service }) => {
 
 const inputsChanged = (prevRole, role) => {
   // todo add name and policy
-  const inputs = pick(['service'], role)
-  const prevInputs = pick(['service'], prevRole)
+  const inputs = pick(['service', 'name', 'policy'], role)
+  const prevInputs = pick(['service', 'name', 'policy'], prevRole)
 
-  if (type(inputs.service) === 'Array') {
+  if (is(Array, inputs.service)) {
     inputs.service.sort()
   }
-  if (type(prevInputs.service) === 'Array') {
+  if (is(Array, prevInputs.service)) {
     prevInputs.service.sort()
   }
 

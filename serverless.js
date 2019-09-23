@@ -9,7 +9,7 @@ const {
   updateAssumeRolePolicy,
   inputsChanged
 } = require('./utils')
-const { Component, utils } = require('@serverless/core')
+const { Component } = require('@serverless/core')
 
 const defaults = {
   service: 'lambda.amazonaws.com',
