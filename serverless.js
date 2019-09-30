@@ -26,7 +26,7 @@ class AwsIamRole extends Component {
 
     this.context.status(`Deploying`)
 
-    inputs.name = this.state.name || this.context.resourceId()
+    inputs.name = inputs.name || this.state.name || this.context.resourceId()
 
     this.context.debug(`Syncing role ${inputs.name} in region ${inputs.region}.`)
     const prevRole = await getRole({ iam, ...inputs })
