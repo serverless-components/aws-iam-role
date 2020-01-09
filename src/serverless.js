@@ -9,26 +9,26 @@ const {
   updateAssumeRolePolicy,
   inputsChanged
 } = require('./utils')
-const { Component, utils } = require('@serverless/core')
+const { Component } = require('@serverless/core')
 
 const defaults = {
   service: 'lambda.amazonaws.com',
   policy: {
-    arn: 'arn:aws:iam::aws:policy/AdministratorAccess'
+    arn: null
   },
   region: 'us-east-1'
 }
 
 class AwsIamRole extends Component {
-  async default(inputs = {}) {
+  async deploy(inputs = {}) {
     inputs = mergeDeepRight(defaults, inputs)
-    const iam = new aws.IAM({ region: inputs.region, credentials: this.context.credentials.aws })
+    const iam = new aws.IAM({ region: inputs.region, credentials: this.credentials.aws })
 
-    this.context.status(`Deploying`)
+    await this.status(`Deploying`)
 
-    inputs.name = this.state.name || this.context.resourceId()
+    inputs.name = this.state.name || inputs.name || Math.random().toString(36).substring(6)
 
-    this.context.debug(`Syncing role ${inputs.name} in region ${inputs.region}.`)
+    await this.debug(`Syncing role ${inputs.name} in region ${inputs.region}.`)
     const prevRole = await getRole({ iam, ...inputs })
 
     // If an inline policy, remove ARN
@@ -39,20 +39,21 @@ class AwsIamRole extends Component {
     }
 
     if (!prevRole) {
-      this.context.debug(`Creating role ${inputs.name}.`)
-      this.context.status(`Creating`)
+      await this.debug(`Creating role ${inputs.name}.`)
+      await this.status(`Creating`)
       inputs.arn = await createRole({ iam, ...inputs })
+      await this.debug(`Done: ${inputs.arn}`)
     } else {
       inputs.arn = prevRole.arn
 
       if (inputsChanged(prevRole, inputs)) {
-        this.context.status(`Updating`)
+        await this.status(`Updating`)
         if (prevRole.service !== inputs.service) {
-          this.context.debug(`Updating service for role ${inputs.name}.`)
+          await this.debug(`Updating service for role ${inputs.name}.`)
           await updateAssumeRolePolicy({ iam, ...inputs })
         }
         if (!equals(prevRole.policy, inputs.policy)) {
-          this.context.debug(`Updating policy for role ${inputs.name}.`)
+          await this.debug(`Updating policy for role ${inputs.name}.`)
           await removeRolePolicy({ iam, ...inputs })
           await addRolePolicy({ iam, ...inputs })
         }
@@ -62,8 +63,8 @@ class AwsIamRole extends Component {
     // todo we probably don't need this logic now that
     // we auto generate unconfigurable names
     if (this.state.name && this.state.name !== inputs.name) {
-      this.context.status(`Replacing`)
-      this.context.debug(`Deleting/Replacing role ${inputs.name}.`)
+      await this.status(`Replacing`)
+      await this.debug(`Deleting/Replacing role ${inputs.name}.`)
       await deleteRole({ iam, name: this.state.name, policy: inputs.policy })
     }
 
@@ -74,7 +75,7 @@ class AwsIamRole extends Component {
     this.state.region = inputs.region
     await this.save()
 
-    this.context.debug(`Saved state for role ${inputs.name}.`)
+    await this.debug(`Saved state for role ${inputs.name}.`)
 
     const outputs = {
       name: inputs.name,
@@ -83,28 +84,28 @@ class AwsIamRole extends Component {
       policy: inputs.policy
     }
 
-    this.context.debug(`Role ${inputs.name} was successfully deployed to region ${inputs.region}.`)
-    this.context.debug(`Deployed role arn is ${inputs.arn}.`)
+    await this.debug(`Role ${inputs.name} was successfully deployed to region ${inputs.region}.`)
+    await this.debug(`Deployed role arn is ${inputs.arn}.`)
 
     return outputs
   }
 
   async remove() {
-    this.context.status(`Removing`)
+    await this.status(`Removing`)
 
     if (!this.state.name) {
-      this.context.debug(`Aborting removal. Role name not found in state.`)
+      await this.debug(`Aborting removal. Role name not found in state.`)
       return
     }
 
     const iam = new aws.IAM({
       region: this.state.region,
-      credentials: this.context.credentials.aws
+      credentials: this.credentials.aws
     })
 
-    this.context.debug(`Removing role ${this.state.name} from region ${this.state.region}.`)
+    await this.debug(`Removing role ${this.state.name} from region ${this.state.region}.`)
     await deleteRole({ iam, ...this.state })
-    this.context.debug(
+    await this.debug(
       `Role ${this.state.name} successfully removed from region ${this.state.region}.`
     )
 
