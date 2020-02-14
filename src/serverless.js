@@ -20,15 +20,20 @@ const defaults = {
 }
 
 class AwsIamRole extends Component {
+
+  /**
+   * Deploy
+   * @param {*} inputs 
+   */
   async deploy(inputs = {}) {
     inputs = mergeDeepRight(defaults, inputs)
     const iam = new aws.IAM({ region: inputs.region, credentials: this.credentials.aws })
 
-    await this.status(`Deploying`)
+    console.log(`Deploying AWS IAM Role...`)
 
     inputs.name = this.state.name || inputs.name || Math.random().toString(36).substring(6)
 
-    await this.debug(`Syncing role ${inputs.name} in region ${inputs.region}.`)
+    console.log(`Checking if role ${inputs.name} exists in region ${inputs.region}.`)
     const prevRole = await getRole({ iam, ...inputs })
 
     // If an inline policy, remove ARN
@@ -39,33 +44,31 @@ class AwsIamRole extends Component {
     }
 
     if (!prevRole) {
-      await this.debug(`Creating role ${inputs.name}.`)
-      await this.status(`Creating`)
+      console.log(`Role doesn't exist.  Creating role ${inputs.name}.`)
       inputs.arn = await createRole({ iam, ...inputs })
-      await this.debug(`Done: ${inputs.arn}`)
+      console.log(`Done: ${inputs.arn}`)
     } else {
       inputs.arn = prevRole.arn
-
+      console.log(`Role exists.  Checking if configuration has changed.`)
       if (inputsChanged(prevRole, inputs)) {
-        await this.status(`Updating`)
+        console.log('Configuration has changed.  Updating role...')
         if (prevRole.service !== inputs.service) {
-          await this.debug(`Updating service for role ${inputs.name}.`)
+          console.log(`Updating service which has changed from ${prevRole.service} to ${inputs.service}`)
           await updateAssumeRolePolicy({ iam, ...inputs })
         }
         if (!equals(prevRole.policy, inputs.policy)) {
-          await this.debug(`Updating policy for role ${inputs.name}.`)
+          console.log(`Updating policy for role ${inputs.name}.`)
           await removeRolePolicy({ iam, ...inputs })
           await addRolePolicy({ iam, ...inputs })
         }
+      } else {
+        console.log('Configuration has not changed')
       }
     }
 
-    // todo we probably don't need this logic now that
-    // we auto generate unconfigurable names
+    // Throw error on name change
     if (this.state.name && this.state.name !== inputs.name) {
-      await this.status(`Replacing`)
-      await this.debug(`Deleting/Replacing role ${inputs.name}.`)
-      await deleteRole({ iam, name: this.state.name, policy: inputs.policy })
+      throw new Error(`Changing the name from ${this.state.name} to ${inputs.name} will delete the AWS IAM Role.  Please remove it manually, change the name, then re-deploy.`)
     }
 
     this.state.name = inputs.name
@@ -73,28 +76,25 @@ class AwsIamRole extends Component {
     this.state.service = inputs.service
     this.state.policy = inputs.policy
     this.state.region = inputs.region
-    await this.save()
 
-    await this.debug(`Saved state for role ${inputs.name}.`)
+    console.log(`Finished creating/updating role.`)
 
-    const outputs = {
+    return {
       name: inputs.name,
       arn: inputs.arn,
       service: inputs.service,
       policy: inputs.policy
     }
-
-    await this.debug(`Role ${inputs.name} was successfully deployed to region ${inputs.region}.`)
-    await this.debug(`Deployed role arn is ${inputs.arn}.`)
-
-    return outputs
   }
 
+  /**
+   * Remove
+   */
   async remove() {
-    await this.status(`Removing`)
+    console.log(`Removing AWS IAM Role...`)
 
     if (!this.state.name) {
-      await this.debug(`Aborting removal. Role name not found in state.`)
+      console.log(`Aborting removal. Role name not found in state.`)
       return
     }
 
@@ -103,23 +103,12 @@ class AwsIamRole extends Component {
       credentials: this.credentials.aws
     })
 
-    await this.debug(`Removing role ${this.state.name} from region ${this.state.region}.`)
+    console.log(`Removing role ${this.state.name} from region ${this.state.region}.`)
     await deleteRole({ iam, ...this.state })
-    await this.debug(
-      `Role ${this.state.name} successfully removed from region ${this.state.region}.`
-    )
-
-    const outputs = {
-      name: this.state.name,
-      arn: this.state.arn,
-      service: this.state.service,
-      policy: this.state.policy
-    }
+    console.log(`Role successfully removed.`)
 
     this.state = {}
-    await this.save()
-
-    return outputs
+    return {}
   }
 }
 
