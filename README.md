@@ -85,7 +85,7 @@ $ serverless deploy --debug
 The `aws-iam-role` component requires a minimal set of configuration with sane defaults that makes working with IAM roles easier. Here's a complete reference of the `serverless.yml` file for the `aws-iam-role` component:
 
 ```yml
-component: aws-iam-role.            # (required) name of the component. In that case, it's aws-iam-role.
+component: aws-iam-role             # (required) name of the component. In that case, it's aws-iam-role.
 name: my-role                       # (required) name of your component instance.
 org: serverlessinc                  # (optional) serverless dashboard org. default is the first org you created during signup.
 app: myApp                          # (optional) serverless dashboard app. default is the same as the name property.
