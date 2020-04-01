@@ -2,6 +2,12 @@
 
 <br/>
 
+<p align="center">
+  <b><a href="https://github.com/serverless-components/aws-iam-role/tree/v1">Click Here for Version 1.0</a></b>
+</p>
+
+<br/>
+
 **AWS IAM Role Component** ⎯⎯⎯ The easiest way to deploy and manage AWS IAM Roles, powered by [Serverless Components](https://github.com/serverless/components/tree/cloud).
 
 <br/>
