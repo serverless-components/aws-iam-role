@@ -44,7 +44,7 @@ $ npm install -g serverless
 You can easily create a new `aws-iam-role` instance just by using the following command and template url.
 
 ```
-$ serverless create --template-url https://github.com/serverless/components/tree/cloud/templates/aws-iam-role
+$ serverless create --template-url https://github.com/serverless/components/tree/master/templates/aws-iam-role
 $ cd aws-iam-role
 ```
 
