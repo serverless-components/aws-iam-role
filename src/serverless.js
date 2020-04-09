@@ -20,18 +20,28 @@ const defaults = {
 }
 
 class AwsIamRole extends Component {
-
   /**
    * Deploy
-   * @param {*} inputs 
+   * @param {*} inputs
    */
   async deploy(inputs = {}) {
+    // this error message assumes that the user is running via the CLI though...
+    if (Object.keys(this.credentials.aws).length === 0) {
+      const msg = `Credentials not found. Make sure you have a .env file in the cwd. - Docs: https://git.io/JvArp`
+      throw new Error(msg)
+    }
+
     inputs = mergeDeepRight(defaults, inputs)
     const iam = new aws.IAM({ region: inputs.region, credentials: this.credentials.aws })
 
     console.log(`Deploying AWS IAM Role...`)
 
-    inputs.name = this.state.name || inputs.name || Math.random().toString(36).substring(6)
+    inputs.name =
+      this.state.name ||
+      inputs.name ||
+      Math.random()
+        .toString(36)
+        .substring(6)
 
     console.log(`Checking if role ${inputs.name} exists in region ${inputs.region}.`)
     const prevRole = await getRole({ iam, ...inputs })
@@ -53,7 +63,9 @@ class AwsIamRole extends Component {
       if (inputsChanged(prevRole, inputs)) {
         console.log('Configuration has changed.  Updating role...')
         if (prevRole.service !== inputs.service) {
-          console.log(`Updating service which has changed from ${prevRole.service} to ${inputs.service}`)
+          console.log(
+            `Updating service which has changed from ${prevRole.service} to ${inputs.service}`
+          )
           await updateAssumeRolePolicy({ iam, ...inputs })
         }
         if (!equals(prevRole.policy, inputs.policy)) {
@@ -68,7 +80,9 @@ class AwsIamRole extends Component {
 
     // Throw error on name change
     if (this.state.name && this.state.name !== inputs.name) {
-      throw new Error(`Changing the name from ${this.state.name} to ${inputs.name} will delete the AWS IAM Role.  Please remove it manually, change the name, then re-deploy.`)
+      throw new Error(
+        `Changing the name from ${this.state.name} to ${inputs.name} will delete the AWS IAM Role.  Please remove it manually, change the name, then re-deploy.`
+      )
     }
 
     this.state.name = inputs.name
