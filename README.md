@@ -105,12 +105,10 @@ inputs:
     policy:                         
       Version: '2012-10-17'
       Statement:
-        # Assume Role (on other accounts)
         - Effect: Allow
           Action:
             - sts:AssumeRole
           Resource: '*'
-        # Cloudwatch logs
         - Effect: Allow
           Action:
             - logs:CreateLogGroup
