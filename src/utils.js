@@ -1,9 +1,11 @@
-const { equals, isEmpty, has, not, pick, type } = require('ramda')
+const { isEmpty } = require('ramda')
+
+const log = (msg) => console.log(msg) // eslint-disable-line
 
 const sleep = async (wait) => new Promise((resolve) => setTimeout(() => resolve(), wait))
 
 const addRolePolicy = async ({ iam, name, policy }) => {
-  if (has('arn', policy)) {
+  if (policy.arn) {
     await iam
       .attachRolePolicy({
         RoleName: name,
@@ -23,21 +25,41 @@ const addRolePolicy = async ({ iam, name, policy }) => {
   return sleep(15000)
 }
 
-const removeRolePolicy = async ({ iam, name, policy }) => {
-  if (has('arn', policy)) {
+const detachRolePolicyIfExists = async ({ iam, name, policy }) => {
+  try {
     await iam
       .detachRolePolicy({
         RoleName: name,
         PolicyArn: policy.arn
       })
       .promise()
-  } else if (!isEmpty(policy)) {
+  } catch (e) {
+    if (e.code !== 'NoSuchEntity') {
+      throw e
+    }
+  }
+}
+
+const deleteRolePolicyIfExists = async ({ iam, name }) => {
+  try {
     await iam
       .deleteRolePolicy({
         RoleName: name,
         PolicyName: `${name}-policy`
       })
       .promise()
+  } catch (e) {
+    if (e.code !== 'NoSuchEntity') {
+      throw e
+    }
+  }
+}
+
+const removeRolePolicy = async ({ iam, name, policy }) => {
+  if (policy.arn) {
+    await detachRolePolicyIfExists({ iam, name, policy })
+  } else if (!isEmpty(policy)) {
+    await deleteRolePolicyIfExists({ iam, name })
   }
 }
 
@@ -91,7 +113,6 @@ const deleteRole = async ({ iam, name, policy }) => {
 const getRole = async ({ iam, name }) => {
   try {
     const res = await iam.getRole({ RoleName: name }).promise()
-    // todo add policy
     return {
       name: res.Role.RoleName,
       arn: res.Role.Arn,
@@ -125,27 +146,12 @@ const updateAssumeRolePolicy = async ({ iam, name, service }) => {
     .promise()
 }
 
-const inputsChanged = (prevRole, role) => {
-  // todo add name and policy
-  const inputs = pick(['service'], role)
-  const prevInputs = pick(['service'], prevRole)
-
-  if (type(inputs.service) === 'Array') {
-    inputs.service.sort()
-  }
-  if (type(prevInputs.service) === 'Array') {
-    prevInputs.service.sort()
-  }
-
-  return not(equals(inputs, prevInputs))
-}
-
 module.exports = {
+  log,
   createRole,
   deleteRole,
   getRole,
   addRolePolicy,
   removeRolePolicy,
-  updateAssumeRolePolicy,
-  inputsChanged
+  updateAssumeRolePolicy
 }
