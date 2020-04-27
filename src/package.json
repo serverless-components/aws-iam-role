@@ -12,7 +12,7 @@
   "author": "Serverless, Inc.",
   "license": "Apache",
   "dependencies": {
-    "ramda": "^0.26.0"
+    "@serverless/aws-sdk": "^0.1.4"
   },
   "devDependencies": {}
 }

@@ -12,9 +12,7 @@ const instanceYaml = {
   stage: 'dev',
   inputs: {
     service: 'lambda.amazonaws.com',
-    policy: {
-      arn: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
-    }
+    policy: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
   }
 }
 
@@ -41,7 +39,6 @@ it('should successfully deploy iam role', async () => {
 
   expect(instance.outputs.name).toBeDefined()
   expect(instance.outputs.arn).toBeDefined()
-  expect(instance.outputs.policy.arn).toBeDefined()
 })
 
 it('should successfully update role and its service', async () => {
@@ -60,29 +57,26 @@ it('should successfully update role and its service', async () => {
 })
 
 it('should successfully update policy document', async () => {
-  instanceYaml.inputs.policy = {
-    Version: '2012-10-17',
-    Statement: [
-      {
-        Effect: 'Allow',
-        Action: ['sts:AssumeRole'],
-        Resource: '*'
-      },
-      {
-        Effect: 'Allow',
-        Action: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'],
-        Resource: '*'
-      }
-    ]
-  }
+  instanceYaml.inputs.policy = [
+    {
+      Effect: 'Allow',
+      Action: ['sts:AssumeRole'],
+      Resource: '*'
+    },
+    {
+      Effect: 'Allow',
+      Action: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'],
+      Resource: '*'
+    }
+  ]
 
-  const instance = await sdk.deploy(instanceYaml, credentials)
+  await sdk.deploy(instanceYaml, credentials)
 
-  const policy = await getRolePolicy(credentials, instance.outputs.name)
+  const policy = await getRolePolicy(credentials, instanceYaml.name)
 
-  const fetchedPolicy = JSON.parse(decodeURIComponent(policy.PolicyDocument))
+  const fetchedPolicy = JSON.parse(decodeURIComponent(policy.PolicyDocument)).Statement
 
-  expect(policy.PolicyName).toEqual(`${instance.outputs.name}-policy`)
+  expect(policy.PolicyName).toEqual(instanceYaml.name)
   expect(fetchedPolicy).toMatchObject(instanceYaml.inputs.policy)
 })
 

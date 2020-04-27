@@ -64,14 +64,14 @@ const getRole = async (credentials, roleName) => {
   return iam.getRole({ RoleName: roleName }).promise()
 }
 
-const getRolePolicy = async (credentials, roleName) => {
+const getRolePolicy = async (credentials, name) => {
   const config = {
     credentials: credentials.aws,
     region: 'us-east-1'
   }
   const iam = new AWS.IAM(config)
 
-  return iam.getRolePolicy({ RoleName: roleName, PolicyName: `${roleName}-policy` }).promise()
+  return iam.getRolePolicy({ RoleName: name, PolicyName: name }).promise()
 }
 
 module.exports = { sleep, generateId, getCredentials, getServerlessSdk, getRole, getRolePolicy }

@@ -89,9 +89,10 @@ app: myApp                          # (optional) serverless dashboard app. defau
 stage: dev                          # (optional) serverless dashboard stage. default is dev.
 
 inputs:
-    service: lambda.amazonaws.com   # (required) service that assumes this role.                     
-    policy:                         # (required) policy arn or document for this role.
-      arn: arn:aws::policy/xxx
+    service: lambda.amazonaws.com   # (optoinal) service that assumes this role. default is lambda.amazonaws.com
+    
+    # (optional) managed policy arn as a string, or inline policy statement as an array. default is the admin arn
+    policy: arn:aws:iam::aws:policy/AdministratorAccess 
 ```
 
 You can also provide an inline policy document instead of a manged policy ARN:
@@ -103,19 +104,16 @@ name: my-role
 inputs:
     service: lambda.amazonaws.com
     policy:                         
-      Version: '2012-10-17'
-      Statement:
-        - Effect: Allow
-          Action:
-            - sts:AssumeRole
-          Resource: '*'
-        - Effect: Allow
-          Action:
-            - logs:CreateLogGroup
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-          Resource: '*'
-
+      - Effect: Allow
+        Action:
+          - sts:AssumeRole
+        Resource: '*'
+      - Effect: Allow
+        Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+        Resource: '*'
 ```
 
 Once you've chosen your configuration, run `serverless deploy` again (or simply just `serverless`) to deploy your changes.
