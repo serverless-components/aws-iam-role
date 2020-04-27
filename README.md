@@ -90,9 +90,34 @@ stage: dev                          # (optional) serverless dashboard stage. def
 
 inputs:
     service: lambda.amazonaws.com   # (required) service that assumes this role.                     
-    policy:                         # (required) policy document or arn for this role.
+    policy:                         # (required) policy arn or document for this role.
       arn: arn:aws::policy/xxx
-    region: us-east-1               # (optional) region to deploy this role to. default is us-east-1
+```
+
+You can also provide an inline policy document instead of a manged policy ARN:
+
+```yml
+component: aws-iam-role
+name: my-role
+
+inputs:
+    service: lambda.amazonaws.com
+    policy:                         
+      Version: '2012-10-17'
+      Statement:
+        # Assume Role (on other accounts)
+        - Effect: Allow
+          Action:
+            - sts:AssumeRole
+          Resource: '*'
+        # Cloudwatch logs
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: '*'
+
 ```
 
 Once you've chosen your configuration, run `serverless deploy` again (or simply just `serverless`) to deploy your changes.
