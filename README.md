@@ -89,6 +89,7 @@ app: myApp                          # (optional) serverless dashboard app. defau
 stage: dev                          # (optional) serverless dashboard stage. default is dev.
 
 inputs:
+    name: my-role                   # (optional) role name. default is the component instance name above.
     service: lambda.amazonaws.com   # (optional) service that assumes this role. default is lambda.amazonaws.com.
     policy:                         # (optional) inline policy statement, or managed policy arn. default is the admin arn.     
       - Effect: Allow
