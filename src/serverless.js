@@ -20,23 +20,26 @@ class AwsIamRole extends Component {
     // IAM roles are global and do not require regional selection
     aws.config.update({ credentials: this.credentials.aws })
 
-    log(`Deploying AWS IAM Role "${this.name}"...`)
-
     const params = {
-      name: this.name,
+      name: inputs.name || this.name,
       service: inputs.service,
       policy: inputs.policy
     }
 
+    log(`Deploying AWS IAM Role "${params.name}"...`)
+
     const { roleArn } = await aws.utils.updateOrCreateRole(params)
+
+    this.state.name = params.name
+    this.state.arn = roleArn
 
     // should we sleep here, or leave that to any component assuming the role?
     // await sleep(15000)
 
-    log(`AWS IAM Role "${this.name}" was successfully deployed.`)
+    log(`AWS IAM Role "${params.name}" was successfully deployed.`)
 
     return {
-      name: this.name,
+      name: params.name,
       arn: roleArn
     }
   }
@@ -48,15 +51,15 @@ class AwsIamRole extends Component {
     // IAM roles are global and do not require regional selection
     aws.config.update({ credentials: this.credentials.aws })
 
-    log(`Removing AWS IAM Role "${this.name}".`)
+    log(`Removing AWS IAM Role "${this.state.name}".`)
 
     const params = {
-      name: this.name
+      name: this.state.name
     }
 
     await aws.utils.deleteRole(params)
 
-    log(`AWS IAM Role "${this.name}" was successfully removed.`)
+    log(`AWS IAM Role "${this.state.name}" was successfully removed.`)
 
     this.state = {}
     return {}
