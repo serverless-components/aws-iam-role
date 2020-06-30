@@ -1,17 +1,12 @@
 {
-  "name": "@serverless/aws-iam-role",
-  "version": "1.0.0",
-  "main": "./serverless.js",
-  "publishConfig": {
-    "access": "public"
-  },
+  "name": "@serverless-components/aws-iam-role",
+  "private": true,
+  "author": "Serverless, Inc.",
+  "license": "Apache",
   "scripts": {
     "lint": "eslint . --fix --cache",
     "test": "jest --testEnvironment node ./tests/integration.test.js"
   },
-  "author": "Serverless, Inc.",
-  "license": "Apache",
-  "dependencies": {},
   "devDependencies": {
     "@serverless/platform-client": "^0.24.0",
     "aws-sdk": "^2.646.0",
