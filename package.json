@@ -5,7 +5,7 @@
   "license": "Apache",
   "scripts": {
     "lint": "eslint . --fix --cache",
-    "test": "jest --testEnvironment node ./tests/integration.test.js"
+    "test": "jest --bail 1 --testEnvironment node ./tests/integration.test.js"
   },
   "devDependencies": {
     "@serverless/platform-client": "^0.24.0",
