@@ -1,11 +1,10 @@
 'use strict'
 
+// eslint-disable-next-line import/no-unresolved
 const { Component } = require('@serverless/core')
 const aws = require('@serverless/aws-sdk')
 
 const log = (msg) => console.log(msg) // eslint-disable-line
-
-const sleep = async (wait) => new Promise((resolve) => setTimeout(() => resolve(), wait))
 
 class AwsIamRole extends Component {
   /**
