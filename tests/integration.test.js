@@ -1,3 +1,5 @@
+'use strict'
+
 const { generateId, getCredentials, getServerlessSdk, getRole, getRolePolicy } = require('./utils')
 
 // set enough timeout for deployment to finish
