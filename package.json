@@ -6,8 +6,8 @@
     "access": "public"
   },
   "scripts": {
-    "test": "jest ./tests/integration.test.js --testEnvironment node",
-    "lint": "eslint . --fix --cache"
+    "lint": "eslint . --fix --cache",
+    "test": "jest ./tests/integration.test.js --testEnvironment node"
   },
   "author": "Serverless, Inc.",
   "license": "Apache",
