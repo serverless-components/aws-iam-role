@@ -6,6 +6,9 @@ on:
   push:
     branches: [master]
 
+env:
+  FORCE_COLOR: 1
+
 jobs:
   validate:
     name: Validate
