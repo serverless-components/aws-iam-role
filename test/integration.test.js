@@ -28,9 +28,10 @@ const credentials = getCredentials();
 // get serverless access key from env and construct sdk
 const sdk = getServerlessSdk(instanceYaml.org);
 
+let isDeployed = false;
 // clean up the instance after tests
 afterAll(async () => {
-  await sdk.remove(instanceYaml, credentials);
+  if (isDeployed) await sdk.remove(instanceYaml, credentials);
 });
 
 it('should successfully deploy iam role', async () => {
@@ -47,6 +48,7 @@ it('should successfully update role and its service', async () => {
   instanceYaml.inputs.service = ['lambda.amazonaws.com', 'apigateway.amazonaws.com'];
 
   const instance = await sdk.deploy(instanceYaml, credentials);
+  isDeployed = true;
 
   const role = await getRole(credentials, instance.outputs.name);
 
@@ -83,6 +85,7 @@ it('should successfully update policy document', async () => {
 });
 
 it('should successfully remove role', async () => {
+  isDeployed = false;
   await sdk.remove(instanceYaml, credentials);
 
   // make sure role was actually removed
