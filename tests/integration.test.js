@@ -1,9 +1,9 @@
-'use strict'
+'use strict';
 
-const { generateId, getCredentials, getServerlessSdk, getRole, getRolePolicy } = require('./utils')
+const { generateId, getCredentials, getServerlessSdk, getRole, getRolePolicy } = require('./utils');
 
 // set enough timeout for deployment to finish
-jest.setTimeout(30000)
+jest.setTimeout(30000);
 
 // the yaml file we're testing against
 const instanceYaml = {
@@ -14,86 +14,86 @@ const instanceYaml = {
   stage: 'dev',
   inputs: {
     service: 'lambda.amazonaws.com',
-    policy: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
-  }
-}
+    policy: 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole',
+  },
+};
 
 // we need to keep the initial instance state after first deployment
 // to validate removal later
-let firstInstance
+let firstInstance;
 
 // get aws credentials from env
-const credentials = getCredentials()
+const credentials = getCredentials();
 
 // get serverless access key from env and construct sdk
-const sdk = getServerlessSdk(instanceYaml.org)
+const sdk = getServerlessSdk(instanceYaml.org);
 
 // clean up the instance after tests
 afterAll(async () => {
-  await sdk.remove(instanceYaml, credentials)
-})
+  await sdk.remove(instanceYaml, credentials);
+});
 
 it('should successfully deploy iam role', async () => {
-  const instance = await sdk.deploy(instanceYaml, credentials)
+  const instance = await sdk.deploy(instanceYaml, credentials);
 
   // store the inital state for removal validation later on
-  firstInstance = instance
+  firstInstance = instance;
 
-  expect(instance.outputs.name).toBeDefined()
-  expect(instance.outputs.arn).toBeDefined()
-})
+  expect(instance.outputs.name).toBeDefined();
+  expect(instance.outputs.arn).toBeDefined();
+});
 
 it('should successfully update role and its service', async () => {
-  instanceYaml.inputs.service = ['lambda.amazonaws.com', 'apigateway.amazonaws.com']
+  instanceYaml.inputs.service = ['lambda.amazonaws.com', 'apigateway.amazonaws.com'];
 
-  const instance = await sdk.deploy(instanceYaml, credentials)
+  const instance = await sdk.deploy(instanceYaml, credentials);
 
-  const role = await getRole(credentials, instance.outputs.name)
+  const role = await getRole(credentials, instance.outputs.name);
 
   const fetchedRoleService = JSON.parse(decodeURIComponent(role.Role.AssumeRolePolicyDocument))
-    .Statement[0].Principal.Service
+    .Statement[0].Principal.Service;
 
-  expect(fetchedRoleService.length).toEqual(2)
-  expect(fetchedRoleService).toContain(instanceYaml.inputs.service[0])
-  expect(fetchedRoleService).toContain(instanceYaml.inputs.service[1])
-})
+  expect(fetchedRoleService.length).toEqual(2);
+  expect(fetchedRoleService).toContain(instanceYaml.inputs.service[0]);
+  expect(fetchedRoleService).toContain(instanceYaml.inputs.service[1]);
+});
 
 it('should successfully update policy document', async () => {
   instanceYaml.inputs.policy = [
     {
       Effect: 'Allow',
       Action: ['sts:AssumeRole'],
-      Resource: '*'
+      Resource: '*',
     },
     {
       Effect: 'Allow',
       Action: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'],
-      Resource: '*'
-    }
-  ]
+      Resource: '*',
+    },
+  ];
 
-  await sdk.deploy(instanceYaml, credentials)
+  await sdk.deploy(instanceYaml, credentials);
 
-  const policy = await getRolePolicy(credentials, instanceYaml.name)
+  const policy = await getRolePolicy(credentials, instanceYaml.name);
 
-  const fetchedPolicy = JSON.parse(decodeURIComponent(policy.PolicyDocument)).Statement
+  const fetchedPolicy = JSON.parse(decodeURIComponent(policy.PolicyDocument)).Statement;
 
-  expect(policy.PolicyName).toEqual(instanceYaml.name)
-  expect(fetchedPolicy).toMatchObject(instanceYaml.inputs.policy)
-})
+  expect(policy.PolicyName).toEqual(instanceYaml.name);
+  expect(fetchedPolicy).toMatchObject(instanceYaml.inputs.policy);
+});
 
 it('should successfully remove role', async () => {
-  await sdk.remove(instanceYaml, credentials)
+  await sdk.remove(instanceYaml, credentials);
 
   // make sure role was actually removed
-  let role
+  let role;
   try {
-    role = await getRole(credentials, firstInstance.outputs.name)
+    role = await getRole(credentials, firstInstance.outputs.name);
   } catch (e) {
     if (e.code !== 'NoSuchEntity') {
-      throw e
+      throw e;
     }
   }
 
-  expect(role).toBeUndefined()
-})
+  expect(role).toBeUndefined();
+});
