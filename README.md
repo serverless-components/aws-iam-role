@@ -89,19 +89,19 @@ app: myApp                          # (optional) serverless dashboard app. defau
 stage: dev                          # (optional) serverless dashboard stage. default is dev.
 
 inputs:
-    name: my-role                   # (optional) role name. default is the component instance name above.
-    service: lambda.amazonaws.com   # (optional) service that assumes this role. default is lambda.amazonaws.com.
-    policy:                         # (optional) inline policy statement, or managed policy arn. default is the admin arn.     
-      - Effect: Allow
-        Action:
-          - sts:AssumeRole
-        Resource: '*'
-      - Effect: Allow
-        Action:
-          - logs:CreateLogGroup
-          - logs:CreateLogStream
-          - logs:PutLogEvents
-        Resource: '*'
+  name: my-role                     # (optional) role name. default is the component instance name above.
+  service: lambda.amazonaws.com     # (optional) service that assumes this role. default is lambda.amazonaws.com.
+  policy:                           # (optional) inline policy statement, or managed policy arn. default is the admin arn.
+    - Effect: Allow
+      Action:
+        - sts:AssumeRole
+      Resource: '*'
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: '*'
 ```
 
 You can also provide a managed policy ARN string instead of an inline policy statement:
@@ -111,8 +111,8 @@ component: aws-iam-role
 name: my-role
 
 inputs:
-    service: lambda.amazonaws.com
-    policy: arn:aws:iam::aws:policy/AdministratorAccess 
+  service: lambda.amazonaws.com
+  policy: arn:aws:iam::aws:policy/AdministratorAccess
 ```
 
 Once you've chosen your configuration, run `serverless deploy` again (or simply just `serverless`) to deploy your changes.
@@ -129,7 +129,7 @@ $ serverless dev
 
 ### 6. Monitor
 
-Anytime you need to know more about your running `aws-iam-role` instance, you can run the following command to view the most critical info. 
+Anytime you need to know more about your running `aws-iam-role` instance, you can run the following command to view the most critical info.
 
 ```
 $ serverless info
@@ -137,14 +137,16 @@ $ serverless info
 
 This is especially helpful when you want to know the outputs of your instances so that you can reference them in another instance. It also shows you the status of your instance, when it was last deployed, and how many times it was deployed. You will also see a url where you'll be able to view more info about your instance on the Serverless Dashboard.
 
-To digg even deeper, you can pass the `--debug` flag to view the state of your component instance in case the deployment failed for any reason. 
+To digg even deeper, you can pass the `--debug` flag to view the state of your component instance in case the deployment failed for any reason.
 
 ```
 $ serverless info --debug
 ```
+
 ### 7. Remove
 
-If you wanna tear down your entire `aws-iam-role` infrastructure that was created during deployment, just run the following command in the directory containing the `serverless.yml` file. 
+If you wanna tear down your entire `aws-iam-role` infrastructure that was created during deployment, just run the following command in the directory containing the `serverless.yml` file.
+
 ```
 $ serverless remove
 ```
