@@ -55,6 +55,13 @@ class AwsIamRole extends Component {
 
     log(`Removing AWS IAM Role "${this.state.name}".`);
 
+    // Skip removal if no name is in state
+    if (!this.state.name) {
+      console.log('AWS IAM Role has no "name" in state.  Skipping removal of this resource.');
+      this.state = {};
+      return {};
+    }
+
     const params = {
       name: this.state.name,
     };
