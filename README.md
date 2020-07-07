@@ -22,7 +22,7 @@
 <img src="/assets/deploy-demo.gif" height="250" align="right">
 
 1. [**Install**](#1-install)
-2. [**Create**](#2-create)
+2. [**Initialize**](#2-initialize)
 3. [**Deploy**](#3-deploy)
 4. [**Configure**](#4-configure)
 5. [**Develop**](#5-develop)
@@ -39,28 +39,21 @@ To get started with component, install the latest version of the Serverless Fram
 $ npm install -g serverless
 ```
 
-### 2. Create
+### 2. Initialize
 
-You can easily create a new `aws-iam-role` instance just by using the following command and template url.
+The easiest way to start using the `aws-iam-role` component is by initializing the `aws-iam-role-starter` template. Just run this command:
 
 ```
-$ serverless create --template-url https://github.com/serverless/components/tree/master/templates/aws-iam-role
-$ cd aws-iam-role
+$ serverless init aws-iam-role-starter
+$ cd aws-iam-role-starter
 ```
 
-Then, create a new `.env` file in the root of the `aws-iam-role` directory right next to `serverless.yml`, and add your AWS access keys:
+This will also create an empty `.env` file. Open that `.env` file and can add in your AWS credentials
 
 ```
 # .env
 AWS_ACCESS_KEY_ID=XXX
 AWS_SECRET_ACCESS_KEY=XXX
-```
-
-You should now have a directory that looks something like this:
-
-```
-|- serverless.yml
-|- .env
 ```
 
 ### 3. Deploy
