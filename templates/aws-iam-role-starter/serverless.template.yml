@@ -1,0 +1,6 @@
+name: aws-iam-role-starter
+org: serverlessinc
+description: Deploys an AWS IAM role
+keywords: aws, serverless, iam, permissions
+repo: https://github.com/serverless-components/aws-iam-role
+license: MIT
