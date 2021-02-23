@@ -1,5 +1,5 @@
 name: aws-iam-role
-version: 2.0.2
+version: 2.0.3
 author: ac360
 org: serverlessinc
 description: Deploys an AWS IAM Role
@@ -8,3 +8,6 @@ repo: https://github.com/owner/project
 readme: ''
 license: MIT
 main: ./src
+types:
+  providers:
+    - aws
